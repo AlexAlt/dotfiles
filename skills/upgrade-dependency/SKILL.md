@@ -86,7 +86,7 @@ Wait for **all** subagent tasks to complete before proceeding.
 ### Step 5: Synthesize report and save
 
 - **Full path (Step 4 was run):** Combine the outputs from dependency-usage-analyzer, upgrade-safety-assessor, and regression-test-planner into one markdown report using the **Output format** below.
-- **Patch-only path (Step 4 skipped):** Build the report from release notes (Step 2) and current/target (Step 3) only. Use the same **Output format** but set **Affected usage** to "Patch-only upgrade; codebase analysis skipped.", **Safety assessment** to "Patch-only – low risk; see release notes summary.", and **Regression test plan** to a brief note (e.g. run existing test suite; optional manual smoke check).
+- **Patch-only path (Step 4 skipped):** Build the report from release notes (Step 2) and current/target (Step 3) only. Use the same **Output format** but set **Affected usage** to "Patch-only upgrade; codebase analysis skipped.", **Safety assessment** to "Patch-only – low risk; see release notes summary.", and **Regression test plan** to the same table structure with one or two rows (e.g. run existing test suite; optional manual smoke check).
 - Save the report to a markdown file (e.g. `UPGRADE-<dependency-name>-<version>.md` in the upgrade-dependency skill directory, or a path the user specifies).
 - This file can be pasted into or read by the **execute-dependency-upgrade** skill to perform the upgrade when the user asks.
 
@@ -132,10 +132,15 @@ Structure the final report so it is both human-readable and parseable by **execu
 - ...
 
 ## Regression test plan
-- **Existing tests:** [command(s) or paths]
-- **Areas to verify:** [components, flows]
-- **Manual QA:** [if applicable]
-- **New tests:** [if recommended]
+
+**Existing tests:** [command(s) or paths, e.g. yarn test, bundle exec rspec spec/path]
+
+| Area / location | What to verify | Notes |
+|-----------------|----------------|-------|
+| [component, flow, or feature] | [specific checks: open/close, selection, layout, etc.] | Manual QA / Covered by tests / New test recommended |
+| ... | ... | ... |
+
+**New tests:** [if recommended, or "None recommended"]
 
 ## Open questions / gaps
 [Missing versions, unclear migration, etc.]

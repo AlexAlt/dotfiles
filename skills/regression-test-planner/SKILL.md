@@ -23,15 +23,22 @@ Use this skill when you have **affected usage** (from dependency-usage-analyzer)
 
 ## Output format
 
-Structure the result for inclusion in the orchestrator's report:
+Structure the result for inclusion in the orchestrator's report. Use a **table** for areas to verify so the user can quickly see where and what to check:
 
 ```markdown
 ## Regression test plan
-- **Existing tests:** [command(s) or paths to run, e.g. yarn test, bundle exec rspec spec/path]
-- **Areas to verify:** [components, flows, or features]
-- **Manual QA:** [if applicable]
-- **New tests:** [if recommended, or "None recommended"]
+
+**Existing tests:** [command(s) or paths to run, e.g. yarn test, bundle exec rspec spec/path]
+
+| Area / location | What to verify | Notes |
+|-----------------|----------------|-------|
+| [component, flow, or feature name] | [specific checks: open/close, selection, layout, snapshot update, etc.] | Manual QA / Covered by tests / New test recommended |
+| ... | ... | ... |
+
+**New tests:** [if recommended, or "None recommended"]
 ```
+
+Each row should give a clear **where** (area/location) and **what to verify** (concrete checks). Use the Notes column for "Manual QA", "Covered by: [test path]", or "New test recommended" as appropriate.
 
 ## What NOT to do
 

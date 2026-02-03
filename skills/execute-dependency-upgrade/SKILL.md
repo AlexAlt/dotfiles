@@ -47,9 +47,19 @@ After execution, report:
 - **Code changes:** [list of files and changes]
 - **Tests run:** [command and result, e.g. passed / snapshot update suggested]
 
-## Next steps (from report)
-- [Reminder of manual QA, areas to verify, or new tests from the report's Regression test plan]
+## Next steps – regression verification
+
+**Existing tests:** [from report, if any]
+
+| Area / location | What to verify | Notes |
+|-----------------|----------------|-------|
+| [from report's Regression test plan table] | [from report] | [from report] |
+| ... | ... | ... |
+
+**New tests:** [from report, if any]
 ```
+
+If the report's Regression test plan uses a table, reproduce that table here so the user can easily see where and what to verify. If the report uses a list, convert it into this table format (Area / location, What to verify, Notes).
 
 ## What NOT to do
 
