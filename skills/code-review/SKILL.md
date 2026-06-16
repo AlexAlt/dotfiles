@@ -1,161 +1,80 @@
 ---
 name: code-review
-description: Reviews branch changes for correctness, security, performance, edge cases, error handling, test quality, and completeness before pushing for human review. Use when the user asks for a code review, wants feedback on their changes, or is preparing to push a branch.
+description: Reviews branch changes with emphasis on architecture, complexity, and readability — plus correctness, security, performance, edge cases, error handling, tests, and completeness — before pushing for human review. Use when the user asks for a code review, wants feedback on their changes, or is preparing to push a branch.
 ---
 
 # Code Review
 
-You are a thorough code reviewer. Your job is to review all changes on the current branch and provide structured, actionable feedback organized by severity. This review happens **before** pushing for human review.
+Review all changes on the current branch and give structured, actionable feedback by severity, **before** pushing for human review.
+
+The primary lens is **design quality**: prefer the simplest organization that satisfies the requirements. Flag complexity that isn't paying for itself — premature abstractions, unnecessary layers, defensive code for states that can't occur, and "flexible" generality nothing uses. Adding code is a cost; deleting it is often the better fix.
 
 ## Workflow
 
-### Step 1: Identify Changes
+1. **Identify changes**: `git diff main...HEAD` (use `git merge-base HEAD main` to confirm the base), `--name-only` for the file list, and `git status` for uncommitted work.
+2. **Read full files**, not just diffs — you need surrounding context to judge how changes fit existing structure and conventions.
+3. **Review against the dimensions below**, reporting only actionable findings.
+4. **Produce the review** in the output format below.
 
-Run these commands to understand the full scope of changes:
+## Priority
 
-```bash
-# Find the base branch
-git merge-base HEAD main
+- **Primary** (the focus of this review): Architecture & Organization, Complexity & Over-engineering, Readability.
+- **Blocking regardless**: Correctness, Security — never wave these through.
+- **Secondary**: everything else; report when it matters, don't pad the review.
 
-# Get the full diff against main
-git diff main...HEAD
+## Primary Dimensions
 
-# List changed files
-git diff main...HEAD --name-only
+- **Architecture & Organization** — Is the code in the right layer (Rails: controller vs. service/interactor vs. model; React: component vs. hook vs. util)? Are responsibilities cohesive — no fat controllers, god objects, or business logic leaking into views/components? Does it reuse existing helpers, concerns, and components instead of reinventing them? Are new files/modules justified, or should this live somewhere that already exists? Does it follow the patterns already established in the codebase?
 
-# Check for any uncommitted changes that should be included
-git status
-```
+- **Complexity & Over-engineering** — Is this the simplest thing that works? Flag: abstractions with a single caller, premature generalization (params/config/options nothing uses), unnecessary indirection or wrapper layers, design patterns where a plain function or component would do, speculative "future-proofing," and deeply nested logic that could be flattened. Could a new teammate follow it in one pass?
 
-### Step 2: Read Changed Files
+- **Readability** — Clear, consistent names matching codebase conventions; obvious control flow; functions/components that do one thing at a reasonable size; no clever one-liners that obscure intent; comments only where the *why* is non-obvious, never narration of the *what*.
 
-For each changed file, read the **full file** (not just the diff) to understand surrounding context. The diff alone is insufficient — you need to see how changes interact with existing code.
+## Secondary Dimensions
 
-### Step 3: Review Against All Dimensions
+- **Correctness** *(blocking)* — logic errors, off-by-one, nil/undefined derefs, bad conditionals, race conditions, queries that don't return what the code expects.
+- **Security** *(blocking)* — injection (SQL/XSS), mass assignment, missing/incorrect authz, unvalidated input, exposed secrets or PII.
+- **Edge Cases** — empty/nil values, boundaries, concurrent access, sensible defaults.
+- **Error Handling** — errors caught at the right level, specific (not overly broad) rescue/catch, meaningful messages, no inconsistent state on failure.
+- **Performance** — N+1 queries (preload associations), redundant DB calls, missing indexes, unbounded result sets, unnecessary React re-renders.
+- **Test Quality** — happy path AND failures covered, edge cases tested, meaningful assertions, appropriate mocks, minimal setup.
+- **Completeness** — acceptance criteria met; migrations, serializers, routes, permissions, feature flags, and docs updated consistently.
+- **Backward Compatibility** — API/interface/prop changes don't break consumers; migrations reversible and zero-downtime safe; no dangling references to removed columns.
+- **Accessibility (UI only)** — keyboard navigation, screen reader support (ARIA, semantic HTML), contrast and focus indicators.
 
-Evaluate every change against each dimension below. Only report findings that are actionable — skip dimensions with no issues.
+## Watch For (common over-engineering smells)
 
-### Step 4: Produce the Review
-
-Use the output format described below.
-
----
-
-## Review Dimensions
-
-### Correctness
-- Does the logic produce the expected result?
-- Are there off-by-one errors, nil/undefined dereferences, or incorrect conditionals?
-- Do database queries return what the code expects?
-- Are race conditions possible?
-
-### Security
-- SQL injection, XSS, mass assignment, or insecure deserialization?
-- Are authorization checks present and correct?
-- Is user input validated and sanitized?
-- Are secrets, tokens, or PII exposed?
-
-### Edge Cases
-- What happens with empty collections, nil/null values, or zero-length strings?
-- Boundary conditions: max/min values, empty states, concurrent access?
-- Are default values sensible?
-
-### Error Handling
-- Are errors caught at appropriate levels?
-- Do rescue/catch blocks handle the right exception types (not overly broad)?
-- Are error messages meaningful for debugging?
-- Can failures leave the system in an inconsistent state?
-
-### Performance
-- N+1 queries — are associations preloaded?
-- Unnecessary iterations or redundant database calls?
-- Missing database indexes for new queries/scopes?
-- Large payloads or unbounded result sets?
-
-### Test Quality
-- Do tests cover the happy path AND failure cases?
-- Are edge cases from the implementation tested?
-- Do tests assert the right things (not just "doesn't crash")?
-- Are mocks/stubs appropriate — not masking real behavior?
-- Is test setup minimal and readable?
-
-### Completeness
-- Are all acceptance criteria addressed?
-- Are migrations, serializers, routes, and permissions all updated consistently?
-- Are feature flags wired up if needed?
-- Is documentation updated where relevant?
-
-### Backward Compatibility
-- Do API changes break existing consumers?
-- Are database migrations reversible and safe for zero-downtime deploy?
-- Are removed/renamed columns still referenced elsewhere?
-- Do interface/type changes break callers?
-
-### Naming & Readability
-- Are variable, method, and class names clear and consistent with codebase conventions?
-- Is the code flow easy to follow without excessive comments?
-- Are abstractions at the right level — not too clever, not too verbose?
-
-### DRY & Design
-- Is there duplicated logic that should be extracted?
-- Do new abstractions follow existing project patterns (interactors, serializers, concerns)?
-- Is code placed in the right layer (controller vs service vs model)?
-
-### Type Safety
-- TypeScript: are types explicit and precise (no `any`, no type assertions without justification)?
-- Ruby: are method signatures clear with keyword args where appropriate?
-- Do return types match what callers expect?
-
-### Accessibility (UI changes only)
-- Keyboard navigation supported?
-- Screen reader friendly (ARIA labels, semantic HTML)?
-- Color contrast and focus indicators?
-
-### Observability
-- Are important operations logged appropriately (following project logging guidelines)?
-- Will errors be visible in monitoring?
-- Are there breadcrumbs for debugging production issues?
-
----
+- Wrappers/classes that only delegate to one other thing.
+- Try/catch or null-guards for states that can't actually occur.
+- Re-implemented stdlib, Rails, or React functionality.
+- Patterns inconsistent with the rest of the file/module.
+- Over-broad params/props/interfaces where only one shape is ever passed.
+- Comments that just restate the code.
 
 ## Output Format
+
+Be terse. One line per finding. No preamble, no restating the diff, no praise padding. Omit any section with no findings.
 
 ```markdown
 # Code Review: [branch name]
 
-## Summary
-[2-3 sentence overview: what the changes do, overall assessment, and biggest concern if any]
+**Summary:** [1 sentence — overall call + biggest concern.]
 
-## Findings
+### 🔴 Critical
+- **[Dimension]** `file:line` — Issue. Fix: [concrete suggestion].
 
-### 🔴 Critical — Must fix before merge
-[Issues that would cause bugs, security vulnerabilities, or data loss]
+### 🟡 Should Fix
+- **[Dimension]** `file:line` — Issue. Fix: [concrete suggestion].
 
-- **[Dimension]** `file:line` — Description of the issue and why it matters.
-  - Suggested fix: [concrete suggestion]
-
-### 🟡 Should Fix — Strongly recommended
-[Issues that could cause problems or significantly hurt maintainability]
-
-- **[Dimension]** `file:line` — Description and rationale.
-  - Suggested fix: [concrete suggestion]
-
-### 🟢 Nit — Optional improvements
-[Style, naming, minor readability suggestions]
-
+### 🟢 Nit
 - **[Dimension]** `file:line` — Suggestion.
-
-### ✅ Looks Good
-[Briefly call out things done well — reinforces good patterns]
-
-- [What was done well and where]
 ```
 
 ## Guidelines
 
-- **Be specific**: always cite `file:line` for every finding.
-- **Be actionable**: every finding should have a concrete fix or question.
-- **Respect project conventions**: review against the project's style guides and rubocop/eslint config, not personal preference.
-- **Don't nitpick formatting** that linters will catch automatically.
-- **Prioritize**: a few critical findings are more valuable than dozens of nits.
-- **Ask, don't assume**: if intent is unclear, frame it as a question rather than a demand.
+- Be terse: no intro/outro, no summarizing what the code does beyond the one-line summary.
+- One line per finding; cite `file:line` and pair each with a concrete fix or question.
+- For complexity findings, prefer suggesting what to remove or collapse over what to add.
+- Respect project conventions and linter config; skip anything a linter would catch.
+- Prioritize design-level findings over nits.
+- Ask rather than assume when intent is unclear.
