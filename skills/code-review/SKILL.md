@@ -63,7 +63,10 @@ Be terse. One line per finding. No preamble, no restating the diff, no praise pa
 ### 🔴 Critical
 - **[Dimension]** `file:line` — Issue. Fix: [concrete suggestion].
 
-### 🟡 Should Fix
+### 🟠 Should Fix
+- **[Dimension]** `file:line` — Issue. Fix: [concrete suggestion].
+
+### 🟡 Design — architecture, complexity, readability
 - **[Dimension]** `file:line` — Issue. Fix: [concrete suggestion].
 
 ### 🟢 Nit
@@ -73,6 +76,7 @@ Be terse. One line per finding. No preamble, no restating the diff, no praise pa
 ## Guidelines
 
 - Be terse: no intro/outro, no summarizing what the code does beyond the one-line summary.
+- Architecture, complexity, and readability findings go in 🟡 Design at minimum (or 🟠/🔴 if severe) — never 🟢 Nit. Reserve 🟢 Nit for trivial style only.
 - One line per finding; cite `file:line` and pair each with a concrete fix or question.
 - For complexity findings, prefer suggesting what to remove or collapse over what to add.
 - Respect project conventions and linter config; skip anything a linter would catch.
